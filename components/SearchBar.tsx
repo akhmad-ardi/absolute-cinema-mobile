@@ -4,7 +4,7 @@ import { icons } from '@/constants/icons'
 
 type Props = {
   placeholder: string;
-  value: string;
+  value?: string;
   onChangeText?: (text: string) => void
   onPress?: () => void
 }

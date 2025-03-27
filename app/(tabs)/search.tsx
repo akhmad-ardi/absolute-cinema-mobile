@@ -3,6 +3,7 @@ import {View, Text, Image, FlatList, ActivityIndicator} from 'react-native';
 import { images } from '@/constants/images';
 import useFetch from "@/services/useFetch";
 import { fetchMovies } from "@/services/api";
+import { updateSearchCount } from '@/services/appwrite';
 import MovieCard from '@/components/MovieCard';
 import { icons } from '@/constants/icons';
 import SearchBar from '@/components/SearchBar';
@@ -18,10 +19,16 @@ export default function search() {
              query: searchQuery
         }), false);
         
+    function handleSearch(text: string) {
+        setSearchQuery(text);
+    }
+
     React.useEffect(() => {
         const timeOutId = setTimeout(async () => {
             if (searchQuery.trim()) {
                 await loadMovies()
+
+
             } else {
                 reset()
             }
@@ -29,6 +36,13 @@ export default function search() {
 
         return () => clearTimeout(timeOutId)
     }, [searchQuery])
+
+    React.useEffect(() => {
+        // Call updateSearchCount only if there are results
+        if (movies?.length! > 0 && movies?.[0]) {
+            updateSearchCount(searchQuery, movies[0]);
+        }
+    }, [movies])
         
     return (
         <View className="flex-1 bg-primary">
@@ -58,7 +72,7 @@ export default function search() {
                             <SearchBar 
                                 placeholder='Search movie...'
                                 value={searchQuery}
-                                onChangeText={(text: string) => setSearchQuery(text)}
+                                onChangeText={handleSearch}
                              />
                         </View>
 

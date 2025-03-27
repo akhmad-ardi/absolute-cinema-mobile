@@ -3,7 +3,7 @@ import {ImageBackground, Image, Text, View} from "react-native";
 import {images} from "@/constants/images";
 import {icons} from "@/constants/icons";
 
-function TabIcon ({ focused, title, icon }: { focused: boolean; title: string; icon: any }) {
+function TabIcon({ focused, title, icon }: { focused: boolean; title: string; icon: any }) {
     if (!focused) {
         return (
             <View className="size-full jutify-center items-center mt-4 rounded-full">
