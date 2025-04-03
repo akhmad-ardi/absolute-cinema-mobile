@@ -1,8 +1,11 @@
-import {View, Text, ScrollView, Image, TouchableOpacity} from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, ToastAndroid } from 'react-native';
 import {useLocalSearchParams, useRouter} from "expo-router";
-import useFetch from '@/services/useFetch';
-import { fetchMovieDetails } from '@/services/api';
+import useFetch from '@/hooks/useFetch';
+import { fetchGetSavedMovie, fetchMovieDetails, fetchRemoveSavedMovie, fetchSaveMovie } from '@/services/api';
 import { icons } from '@/constants/icons';
+import useAuth from '@/hooks/useAuth';
+import LoadingCircle from '@/components/LoadingDot';
 
 interface MovieInfoProps {
     label: string;
@@ -24,9 +27,63 @@ export default function detail() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
 
-    const { data: movie, loading } = useFetch(() =>
+    const [movieAlreadySaved, setMovieAlreadySaved] = React.useState<boolean>(false);
+
+    const { token, isAuthenticated } = useAuth();
+
+    const { data: movie } = useFetch(() =>
         fetchMovieDetails(id as string)
     );
+    
+    const { data: dataSavedMovies, loading: loadingSavedMovies, refetch: getSavedMovie } = useFetch(() => fetchGetSavedMovie(token), false);
+    const { data: dataSaveMovie, loading: loadingSaveMovie, refetch: loadSaveMovie } = useFetch(() => fetchSaveMovie(token, movie!), false);
+    const { data: dataRemoveSavedMovie, loading: loadingRemoveSaveMovie, refetch: loadRemoveSavedMovie } = useFetch(() => fetchRemoveSavedMovie(token, movie?.id!), false);
+
+    async function saveMovie() {
+        await loadSaveMovie();
+
+        await getSavedMovie();
+    }
+
+    async function removeSavedMovie() {
+        await loadRemoveSavedMovie();
+
+        await getSavedMovie();
+    }
+
+    React.useEffect(() => {
+        if (dataSaveMovie?.statusCode >= 400) {
+            ToastAndroid.show(dataSaveMovie.message, 1000);
+        }
+        if (dataSaveMovie?.statusCode === 201) {
+            ToastAndroid.show(dataSaveMovie.message, 1000);
+        }
+    }, [dataSaveMovie]);
+
+    React.useEffect(() => {
+        if (dataRemoveSavedMovie?.statusCode >= 400) {
+            ToastAndroid.show(dataRemoveSavedMovie.message, 1000);
+        }
+        if (dataRemoveSavedMovie?.statusCode === 200) {
+            ToastAndroid.show(dataRemoveSavedMovie.message, 1000);
+        }
+    }, [dataRemoveSavedMovie])
+
+    React.useEffect(() => {
+        async function loadSavedMovie() {
+            return await getSavedMovie();
+        }
+
+        if (isAuthenticated) {
+            loadSavedMovie();
+        }
+    }, [isAuthenticated]);
+
+    React.useEffect(() => {
+        const findIndexMovieSaved = dataSavedMovies?.data.findIndex((m:any) => movie?.id === m.movie_id)
+
+        setMovieAlreadySaved(findIndexMovieSaved === -1 ? false : true);
+    }, [dataSavedMovies])
 
     return (
         <View className="bg-primary flex-1">
@@ -40,11 +97,25 @@ export default function detail() {
                         resizeMode="stretch"
                     />
 
+                    {movieAlreadySaved ? (
+                        <TouchableOpacity disabled={loadingSaveMovie || loadingRemoveSaveMovie || loadingSavedMovies} onPress={removeSavedMovie} className="absolute bottom-5 right-[83px] px-10 py-4 rounded-lg bg-white flex items-center justify-center">
+                            <Text className='text-red-400 font-bold'>
+                                {loadingSaveMovie || loadingRemoveSaveMovie || loadingSavedMovies ? 'Loading...' : 'Remove'}
+                            </Text>
+                        </TouchableOpacity>
+                    ):(
+                        <TouchableOpacity disabled={loadingSaveMovie || loadingRemoveSaveMovie || loadingSavedMovies} onPress={saveMovie} className="absolute bottom-5 right-[83px] px-10 py-4 rounded-lg bg-white flex items-center justify-center">
+                            <Text className='text-accent font-bold'>
+                                {loadingSaveMovie || loadingRemoveSaveMovie || loadingSavedMovies ? 'Loading...' : `Save`}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity className="absolute bottom-5 right-5 rounded-full size-14 bg-white flex items-center justify-center">
                         <Image
-                        source={icons.play}
-                        className="w-6 h-7 ml-1"
-                        resizeMode="stretch"
+                            source={icons.play}
+                            className="w-6 h-7 ml-1"
+                            resizeMode="stretch"
                         />
                     </TouchableOpacity>
                 </View>
@@ -104,9 +175,9 @@ export default function detail() {
                 onPress={router.back}
             >
                 <Image
-                source={icons.arrow}
-                className="size-5 mr-1 mt-0.5 rotate-180"
-                tintColor="#fff"
+                    source={icons.arrow}
+                    className="size-5 mr-1 mt-0.5 rotate-180"
+                    tintColor="#fff"
                 />
                 <Text className="text-white font-semibold text-base">Go Back</Text>
             </TouchableOpacity>

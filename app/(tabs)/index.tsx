@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import SearchBar from "@/components/SearchBar";
-import useFetch from "@/services/useFetch";
+import useFetch from "@/hooks/useFetch";
 import { fetchMovies } from "@/services/api";
 import MovieCard from "@/components/MovieCard";
 import { getTrendingMovies } from "@/services/appwrite";

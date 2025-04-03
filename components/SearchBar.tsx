@@ -21,7 +21,7 @@ export default function SearchBar({ placeholder, onPress, value, onChangeText }:
             placeholder={placeholder}
             placeholderTextColor='#A8B5DB'
             className='flex-1 ml-2 text-white'
-            />
+        />
     </View>
   )
 }

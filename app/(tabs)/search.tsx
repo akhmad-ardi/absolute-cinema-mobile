@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, Image, FlatList, ActivityIndicator} from 'react-native';
 import { images } from '@/constants/images';
-import useFetch from "@/services/useFetch";
+import useFetch from "@/hooks/useFetch";
 import { fetchMovies } from "@/services/api";
 import { updateSearchCount } from '@/services/appwrite';
 import MovieCard from '@/components/MovieCard';
