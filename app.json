@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ardi.absolutecinema"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +37,17 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c3449ae1-8140-438d-b40d-f8a7a9e39fbd"
+      }
     }
-  }
+  },
+  "assetBundlePatterns": [
+    "**/*"
+  ]
 }
